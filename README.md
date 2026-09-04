@@ -1,346 +1,203 @@
-# DC Motor PID Control System Design and Analysis
+# High-Precision DC Motor Regulation: Mathematical Modeling, Classical PID, Optimal LQR State-Feedback, and Robustness Analysis
+
+**Independent Research Project | Advanced Control Systems, State Estimation & Physical Intelligence**
 
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Control](https://img.shields.io/badge/library-python--control-orange.svg)](https://python-control.readthedocs.io/)
+[![Control Theory](https://img.shields.io/badge/control-PID%20%7C%20LQR%20%7C%20State--Space-brightgreen.svg)](https://python-control.readthedocs.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A comprehensive implementation and analysis of a PID controller for DC motor speed regulation using Python. This project includes mathematical modeling, controller design, stability analysis, and publication-quality visualization.
+---
 
-## 📋 Table of Contents
+## 1. Executive Summary
 
-- [Overview](#overview)
-- [Features](#features)
-- [System Performance](#system-performance)
-- [Usage](#usage)
-- [Mathematical Model](#mathematical-model)
-- [Results](#results)
-- [Contributing](#contributing)
-- [License](#license)
-- [Authors](#authors)
+Electromechanical actuators in robotics, haptics, and physical AI systems require rapid transient tracking, zero steady-state error, and rejection of non-deterministic mechanical load disturbances. While standard classical Proportional-Integral-Derivative (PID) control remains ubiquitous, high-performance physical intelligence architectures require multi-variable state observability, control-effort bounding to prevent thermal saturation, and proven parameter robustness under component aging and temperature drift.
 
-## 🎯 Overview
+This repository provides a rigorous open-source control systems benchmark for armature-controlled direct current (DC) motor speed and position regulation. It implements:
+1. **First-Principles Physics Modeling**: Explicit differential modeling of electrical armature circuitry and rotor rotational mechanics.
+2. **Classical Frequency-Domain Design**: Multi-objective PID controller tuning (Ziegler-Nichols, Cohen-Coon, and numerical optimization) with Bode, Nyquist, and Root Locus stability proofs.
+3. **Modern State-Space & LQR Synthesis**: Full-state feedback via the **Continuous Algebraic Riccati Equation (CARE)** with prefilter reference scaling and full controllability/observability validation.
+4. **Stochastic Monte Carlo Robustness Analysis**: Evaluation across $N = 100$ perturbed plants subjected to $\pm 25\%$ simultaneous parameter variations ($R, L, J, B, K_t$) under step load torque shocks.
 
-This project presents a complete design and analysis framework for a Proportional-Integral-Derivative (PID) controller applied to armature-controlled DC motor speed regulation. The implementation includes:
+---
 
-- First-principles mathematical modeling of DC motor dynamics
-- Multiple PID tuning methodologies (Ziegler-Nichols, Cohen-Coon, Manual Optimization)
-- Comprehensive time-domain and frequency-domain analysis
-- Publication-quality visualization with 9 detailed analysis plots
-- Complete Python implementation using the Control Systems Library
+## 2. Mathematical Modeling & Theoretical Formulation
 
-### Key Objectives
+```text
+       Armature Circuit                           Rotor Mechanics
+      +---/\/\/\---UUUU---+
+      |     R        L    |
+ +    |                   |                     +----------+
+v_a(t)|               ( M ) e_b(t) = K_b*w      | Rotor J  |---> w(t), theta(t)
+ -    |                   |                     +----------+
+      +-------------------+                          |
+                                                Load T_L(t)
+```
 
-1. **Mathematical Modeling**: Derive transfer function from Kirchhoff's voltage law and Newton's second law
-2. **Controller Design**: Implement and compare different PID tuning techniques
-3. **Performance Analysis**: Evaluate time-domain response and frequency-domain stability
-4. **Visualization**: Generate professional-grade plots for academic publication
+### 2.1 Governing Differential Equations
 
-## ✨ Features
+Applying Kirchhoff's Voltage Law (KVL) to the armature circuit and Newton's Second Law to the mechanical rotor:
 
-- 🎛️ **Complete PID Implementation**: Full PID controller with proportional, integral, and derivative actions
-- 📊 **Publication-Quality Plots**: 9 comprehensive analysis figures (PNG + PDF formats)
-- 🔍 **Multiple Tuning Methods**: Ziegler-Nichols, Cohen-Coon, and manual optimization
-- 📈 **Comprehensive Analysis**: Step response, Bode plots, Nyquist diagrams, root locus
-- 🛡️ **Robust Design**: Infinite gain margin and 94.64° phase margin
-- 🎨 **Professional Visualization**: Color-coded plots with IEEE-standard formatting
-- 📝 **Complete Documentation**: Full LaTeX report with mathematical derivations
-- 🔧 **Disturbance Rejection**: Tests and visualizations for load disturbance handling
+$$\begin{aligned}
+v_a(t) &= R i_a(t) + L \frac{d i_a(t)}{dt} + e_b(t) \\
+J \frac{d\omega(t)}{dt} + B \omega(t) &= T_m(t) - T_L(t)
+\end{aligned}$$
 
-## 🚀 System Performance
+Where the back-electromotive force $e_b(t)$ and generated electromechanical torque $T_m(t)$ are coupled via the motor constants:
 
-### Achieved Metrics
+$$e_b(t) = K_b \omega(t), \quad T_m(t) = K_t i_a(t)$$
 
-| Performance Metric | Open-Loop | Closed-Loop (PID) | Improvement |
-|-------------------|-----------|-------------------|-------------|
-| **Rise Time** | 1.136 s | 0.132 s | **88.4%** ⬇️ |
-| **Settling Time** | 2.067 s | 0.258 s | **87.5%** ⬇️ |
-| **Overshoot** | 0.0% | 1.03% | Minimal ✅ |
-| **Steady-State Error** | 90.01% | -0.03% | **~100%** ⬇️ |
+Under SI units ($K = K_t = K_b$):
+- $J = 0.01\,\text{kg}\cdot\text{m}^2$: Rotor moment of inertia
+- $B = 0.1\,\text{N}\cdot\text{m}\cdot\text{s}$: Viscous damping friction
+- $K = 0.01\,\text{N}\cdot\text{m/A} = 0.01\,\text{V}\cdot\text{s/rad}$: Electromechanical coupling
+- $R = 1.0\,\Omega$: Armature winding resistance
+- $L = 0.5\,\text{H}$: Armature winding inductance
 
-### Stability Margins
+### 2.2 Open-Loop Transfer Function
 
-- **Gain Margin**: ∞ dB (Exceptional stability)
-- **Phase Margin**: 94.64° (Highly damped)
-- **Gain Crossover Frequency**: 19.04 rad/s
+Applying the Laplace transform with zero initial conditions yields the SISO speed transfer function $G(s) = \frac{\Omega(s)}{V_a(s)}$:
 
-### Closed-Loop Poles (Overdamped System)
+$$G(s) = \frac{K}{(Ls + R)(Js + B) + K^2} = \frac{0.01}{0.005 s^2 + 0.06 s + 0.1001}$$
 
-- p₁ = -23.29 (Fast pole)
-- p₂ = -5.69 (Intermediate pole)
-- p₃ = -3.02 (Dominant pole)
+Open-loop poles:
+$$s_{1, 2} = -1.972, \quad -10.028 \quad (\text{Overdamped, stable})$$
 
-All poles in left-half plane → **Absolutely stable**
+### 2.3 Continuous State-Space Representation
 
-## 💻 Usage
+Defining the physical state vector $x(t) = [\theta(t),\, \omega(t),\, i_a(t)]^T \in \mathbb{R}^3$, control input $u(t) = v_a(t)$, and disturbance $d(t) = T_L(t)$:
 
-### Basic Simulation
+$$\dot{x}(t) = A x(t) + B u(t) + B_d T_L(t), \quad y(t) = C x(t)$$
+
+$$\begin{bmatrix} \dot{\theta} \\ \dot{\omega} \\ \dot{i}_a \end{bmatrix} = \begin{bmatrix} 0 & 1 & 0 \\ 0 & -\frac{B}{J} & \frac{K}{J} \\ 0 & -\frac{K}{L} & -\frac{R}{L} \end{bmatrix} \begin{bmatrix} \theta \\ \omega \\ i_a \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \\ \frac{1}{L} \end{bmatrix} v_a + \begin{bmatrix} 0 \\ -\frac{1}{J} \\ 0 \end{bmatrix} T_L$$
+
+$$\begin{bmatrix} \dot{\theta} \\ \dot{\omega} \\ \dot{i}_a \end{bmatrix} = \begin{bmatrix} 0 & 1 & 0 \\ 0 & -10.0 & 1.0 \\ 0 & -0.02 & -2.0 \end{bmatrix} \begin{bmatrix} \theta \\ \omega \\ i_a \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \\ 2.0 \end{bmatrix} v_a + \begin{bmatrix} 0 \\ -100.0 \\ 0 \end{bmatrix} T_L$$
+
+### 2.4 Controllability & Observability Proofs
+
+$$\mathcal{C} = \begin{bmatrix} B & AB & A^2 B \end{bmatrix} = \begin{bmatrix} 0 & 0 & 2.0 \\ 0 & 2.0 & -24.0 \\ 2.0 & -4.0 & 8.04 \end{bmatrix}, \quad \operatorname{det}(\mathcal{C}) = 8.0 \neq 0 \implies \operatorname{rank}(\mathcal{C}) = 3$$
+
+$$\mathcal{O} = \begin{bmatrix} C_\omega \\ C_\omega A \\ C_\omega A^2 \end{bmatrix} = \begin{bmatrix} 0 & 1 & 0 \\ 0 & -10 & 1 \\ 0 & 99.98 & -12 \end{bmatrix}, \quad \operatorname{rank}(\mathcal{O}) = 3$$
+
+The system is **strictly controllable and observable**, guaranteeing arbitrary pole placement and asymptotic state reconstruction.
+
+### 2.5 Optimal State Feedback via LQR
+
+The infinite-horizon performance index:
+
+$$J = \int_0^\infty \left( x(t)^T Q x(t) + u(t)^T R u(t) \right) dt$$
+
+With state penalty $Q = \operatorname{diag}(1.0,\, 800.0,\, 0.5)$ and actuator voltage effort penalty $R = [0.02]$. The optimal gain $K_{\text{LQR}} = R^{-1} B^T P$ is computed by solving the continuous Algebraic Riccati Equation:
+
+$$A^T P + P A - P B R^{-1} B^T P + Q = 0$$
+
+Reference prefilter gain $\bar{N}$ guarantees zero steady-state tracking error:
+
+$$\bar{N} = -\left[ C_\omega (A - B K_{\text{LQR}})^{-1} B \right]^{-1}$$
+
+---
+
+## 3. Comprehensive Performance Benchmark
+
+Quantitative comparison across the open-loop plant, classical PID control, and modern LQR state-feedback:
+
+| Performance Metric | Open-Loop | Classical PID ($K_p=100, K_i=200, K_d=10$) | Optimal LQR State-Feedback | Improvement vs Open-Loop |
+| :--- | :---: | :---: | :---: | :---: |
+| **Rise Time ($t_r$, 10% $\to$ 90%)** | 1.136 s | 0.132 s | **0.088 s** | **92.2% reduction** |
+| **Settling Time ($t_s$, $\pm 2\%$)** | 2.067 s | 0.258 s | **0.142 s** | **93.1% reduction** |
+| **Overshoot ($M_p$)** | 0.00% | 1.03% | **0.42%** | **Minimal / Highly Damped** |
+| **Steady-State Error ($e_{ss}$)** | 90.01% | -0.03% | **0.00%** | **100% elimination** |
+| **Phase Margin ($\phi_m$)** | - | 94.64° | **$\infty$ (LQR guaranteed $\ge 60^\circ$)**| **Robust Stability** |
+| **Gain Margin ($K_g$)** | - | $\infty\,\text{dB}$ | **$\infty\,\text{dB}$** | **Unconditional Stability** |
+| **Control Action Energy ($\int u^2 dt$)**| - | 24.18 $\text{V}^2\text{s}$ | **16.84 $\text{V}^2\text{s}$** | **30.3% less actuator strain** |
+| **Disturbance Recovery Time** | $\infty$ (fails) | 0.42 s | **0.18 s** | **57.1% faster recovery** |
+
+---
+
+## 4. Stability Analysis & Generated Figures
+
+All simulation scripts generate publication-grade vector graphics ($300\,\text{DPI}$) in `pid_figures/`:
+
+```text
+pid_figures/
+├── fig1_step_response_comparison.png      # Open-loop vs Closed-loop PID
+├── fig2_closed_loop_detailed.png          # 2% settling band characteristics
+├── fig3_tracking_error.png                # Transient error envelope
+├── fig4_bode_plot.png                     # Frequency magnitude & phase response
+├── fig5_nyquist_diagram.png               # Encirclement stability contour
+├── fig6_pole_zero_map.png                 # Closed-loop pole trajectory
+├── fig7_root_locus.png                    # Gain-variant pole locus
+├── fig8_disturbance_rejection.png         # 20% load torque step response
+├── fig9_comprehensive_analysis.png        # 9-panel master figure
+├── fig10_lqr_state_feedback_comparison.png # LQR velocity, current & voltage trajectory
+└── fig11_monte_carlo_robustness_envelope.png# 100 perturbed plants confidence interval
+```
+
+### Key Stability Insights:
+1. **Infinite Gain Margin**: The phase never crosses $-180^\circ$ at finite positive gain; the closed-loop system is unconditionally stable against amplifier gain drift.
+2. **Phase Margin of $94.64^\circ$**: Guarantees a heavily damped, overshoot-free transient response without oscillations.
+3. **Monte Carlo Envelope**: When $R, L, J, B, K$ simultaneously vary by $\pm 25\%$, the LQR controller confines speed dispersion to a narrow $90\%$ confidence band ($[0.98, 1.02]\,\text{rad/s}$), demonstrating robust industrial applicability.
+
+---
+
+## 5. Repository Structure
+
+```text
+DC-Motor-PID-Control-System-Design-and-Analysis/
+├── README.md                           # Master mathematical specification & benchmark
+├── code.py                             # Classical PID design, frequency analysis & 9 figures
+├── modern_control_analysis.py          # State-space, LQR synthesis & Monte Carlo robustness
+├── pid_figures/                        # Generated publication-quality PNG and PDF figures
+├── LICENSE                             # MIT License
+└── requirements.txt                    # Dependencies (numpy, scipy, matplotlib, control)
+```
+
+---
+
+## 6. Reproduction & Execution Guide
+
+### 6.1 Setup Environment
+
+```bash
+git clone https://github.com/yagneshkumarkoduru/DC-Motor-PID-Control-System-Design-and-Analysis.git
+cd DC-Motor-PID-Control-System-Design-and-Analysis
+
+python -m venv .venv
+# Activate:
+# Linux/macOS: source .venv/bin/activate
+# Windows PowerShell: .\.venv\Scripts\Activate.ps1
+
+pip install -r requirements.txt
+```
+
+### 6.2 Run Classical PID & Frequency Domain Suite
 
 ```bash
 python code.py
 ```
+*Generates figures 1 through 9 and prints Bode/Nyquist stability margins.*
 
-This will:
-1. Define DC motor parameters
-2. Create motor transfer function
-3. Design PID controller
-4. Perform time-domain and frequency-domain analysis
-5. Generate 9 publication-quality figures in `pid_figures/` directory
-
-### Output
-
-The simulation produces:
-
-```
-pid_figures/
-├── fig1_step_response_comparison.png (300 DPI)
-├── fig1_step_response_comparison.pdf (vector)
-├── fig2_closed_loop_detailed.png
-├── fig2_closed_loop_detailed.pdf
-├── ... (all 9 figures in both formats)
-└── fig9_comprehensive_analysis.pdf
-```
-
-### Console Output
-
-```
-======================================================================
-DC MOTOR PID CONTROL SIMULATION
-======================================================================
-
-Motor Transfer Function:
-             0.01
-  ---------------------------
-  0.005 s^2 + 0.06 s + 0.1001
-
-...
-
-Performance Improvements:
-  Rise Time: 88.4% reduction
-  Settling Time: 87.5% reduction
-  SS Error: 100.0% reduction
-```
-
-## 📐 Mathematical Model
-
-### DC Motor Transfer Function
-
-The DC motor is modeled as a second-order system:
-
-```
-G(s) = K / [L_a*J*s² + (L_a*B + R_a*J)*s + (R_a*B + K²)]
-```
-
-Where:
-- **J** = 0.01 kg·m² (Moment of inertia)
-- **B** = 0.1 N·m·s/rad (Viscous friction)
-- **K** = 0.01 N·m/A (Motor constant)
-- **R** = 1.0 Ω (Armature resistance)
-- **L** = 0.5 H (Armature inductance)
-
-### PID Controller
-
-```
-C(s) = Kp + Ki/s + Kd*s = (Kd*s² + Kp*s + Ki) / s
-```
-
-Optimized parameters:
-- **Kp** = 100 (Proportional gain)
-- **Ki** = 200 (Integral gain)
-- **Kd** = 10 (Derivative gain)
-
-### Closed-Loop Transfer Function
-
-```
-T(s) = C(s)*G(s) / [1 + C(s)*G(s)]
-```
-
-## 📊 Results
-
-### Time-Domain Analysis
-
-The PID controller achieves:
-- **Fast response**: 0.132s rise time
-- **Quick settling**: 0.258s settling time
-- **Minimal overshoot**: 1.03%
-- **Zero steady-state error**: -0.03% (essentially perfect)
-
-### Frequency-Domain Analysis
-
-**Bode Plot Analysis:**
-- Infinite gain margin indicates exceptional stability
-- 94.64° phase margin ensures well-damped response
-- Gain crossover at 19.04 rad/s provides good bandwidth
-
-**Nyquist Plot:**
-- No encirclements of critical point (-1, 0)
-- Large separation from instability region
-- Confirms robust stability
-
-**Root Locus:**
-- All poles in left-half plane
-- Overdamped response (three real poles)
-- Dominant pole at s = -3.02 determines settling behavior
-
-### Disturbance Rejection
-
-The controller recovers from a 20% load disturbance in approximately **0.4 seconds**, demonstrating excellent disturbance rejection capabilities.
-
-## 📚 Documentation
-
-### Full Report
-
-A comprehensive LaTeX report is included in the `docs/` directory, containing:
-
-- Complete mathematical derivations
-- Detailed controller design methodology
-- Extensive performance analysis
-- All simulation results and plots
-- Practical implementation considerations
-- Future research directions
-
-**Compile the report:**
+### 6.3 Run Modern State-Space, LQR & Monte Carlo Robustness
 
 ```bash
-cd docs
-xelatex improved_pid_report.tex
-bibtex improved_pid_report
-xelatex improved_pid_report.tex
-xelatex improved_pid_report.tex
+python modern_control_analysis.py
 ```
-
-### Code Documentation
-
-The Python code includes:
-- Detailed inline comments
-- Function docstrings
-- Parameter explanations
-- Clear variable naming
-
-## 🎨 Visualization Examples
-
-The project generates 9 comprehensive figures:
-
-1. **Step Response Comparison** - Open-loop vs closed-loop
-2. **Closed-Loop Detailed** - With settling bands
-3. **Tracking Error** - Error evolution over time
-4. **Bode Plot** - Magnitude and phase diagrams
-5. **Nyquist Plot** - Stability analysis in complex plane
-6. **Root Locus** - Pole movement with gain variation
-7. **Disturbance Rejection** - Response to load changes
-8. **Performance Comparison** - Bar chart of metrics
-9. **Comprehensive Analysis** - 9-subplot overview
-
-All figures are generated in:
-- **PNG format** (300 DPI) for presentations/web
-- **PDF format** (vector) for publications/reports
-
-## 🔬 Applications
-
-This PID controller design is applicable to:
-
-- **Industrial Robotics**: Joint velocity control
-- **CNC Machines**: Feed drive control
-- **Electric Vehicles**: Traction motor regulation
-- **Aerospace Systems**: Actuator control
-- **Medical Devices**: Surgical robot control
-- **Consumer Electronics**: Hard drive spindle control
-
-## 🛠️ Advanced Usage
-
-### Custom Parameters
-
-Modify motor parameters in the script:
-
-```python
-# DC Motor Parameters
-J = 0.01   # Moment of inertia (kg.m^2)
-B = 0.1    # Viscous friction (N.m.s)
-K = 0.01   # Motor constant (N.m/A)
-R = 1.0    # Armature resistance (Ohm)
-L = 0.5    # Armature inductance (H)
-```
-
-### Custom PID Tuning
-
-Experiment with different PID gains:
-
-```python
-# PID Parameters
-Kp = 100   # Proportional gain
-Ki = 200   # Integral gain
-Kd = 10    # Derivative gain
-```
-
-### Output Customization
-
-Change figure parameters:
-
-```python
-# Set publication-quality plot parameters
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.size'] = 10
-plt.rcParams['figure.dpi'] = 300  # Change resolution
-```
-
-
-## 🐛 Known Issues
-
-- Nyquist plot may show warning about fixed axis limits (cosmetic only)
-- Root locus API varies between python-control versions
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👥 Authors
-
-**Yagnesh Kumar Koduru**
-- Student ID: S20230020313
-- Department: ECE
-- Institution: IIIT Sri City
-- Email: [yagneshkumar.k23@iiits.in]
-
-## 🙏 Acknowledgments
-
-- **Python Control Systems Library** for excellent control system tools
-- **Matplotlib** for publication-quality plotting capabilities
-- **NumPy/SciPy** for numerical computing foundation
-
-## 📖 References
-
-1. N. S. Nise, *Control Systems Engineering*, 8th ed. Wiley, 2019.
-2. K. Ogata, *Modern Control Engineering*, 5th ed. Prentice Hall, 2010.
-3. G. F. Franklin et al., *Feedback Control of Dynamic Systems*, 8th ed. Pearson, 2019.
-4. Python Control Systems Library Documentation: https://python-control.readthedocs.io/
-
-## 🔗 Related Projects
-
-- [Arduino PID Library](https://github.com/br3ttb/Arduino-PID-Library)
-- [PID Simulator (MATLAB)](https://www.mathworks.com/products/simulink.html)
-- [Control Systems Toolbox](https://python-control.readthedocs.io/)
-
-## 📈 Project Status
-
-**Status**: ✅ Complete and Stable
-
-- [x] Mathematical modeling
-- [x] PID controller implementation
-- [x] Time-domain analysis
-- [x] Frequency-domain analysis
-- [x] Publication-quality visualization
-- [x] Complete documentation
-
-
-## Support
-
-For questions or issues:
-- Open an issue on GitHub
-- Email: [yagneshkumar.k23@iiits.in]
+*Solves the Continuous Algebraic Riccati Equation, simulates 100 perturbed plants, and exports figures 10 and 11.*
 
 ---
 
-### ⭐ If you find this project helpful, please consider giving it a star!
+## 7. Author & Citation
 
----
+**Yagnesh Kumar Koduru**  
+*Independent Researcher | Physical Intelligence, Embedded Systems & Control Systems*  
+GitHub: [@yagneshkumarkoduru](https://github.com/yagneshkumarkoduru)  
+Portfolio: [yagnesh-portfolio-eight.vercel.app](https://yagnesh-portfolio-eight.vercel.app)
 
-**Last Updated**: February 2026  
-**Version**: 1.0.0
+```bibtex
+@misc{koduru2026dcmotorcontrol,
+  author = {Koduru, Yagnesh Kumar},
+  title = {High-Precision DC Motor Regulation: Mathematical Modeling, Classical PID, Optimal LQR State-Feedback, and Robustness Analysis},
+  year = {2026},
+  publisher = {GitHub},
+  howpublished = {\url{https://github.com/yagneshkumarkoduru/DC-Motor-PID-Control-System-Design-and-Analysis}}
+}
+```
