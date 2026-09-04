@@ -3,9 +3,12 @@
 **Independent Research Project | Advanced Nonlinear Control Systems, State Estimation & Robotics Actuation**
 
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Control Theory](https://img.shields.io/badge/control-PID%20%7C%20LQR%20%7C%20NDOB%20%7C%20ISMC-brightgreen.svg)](https://python-control.readthedocs.io/)
+[![Control Theory](https://img.shields.io/badge/control-Neural--Adaptive%20STA%20%7C%20CBF%20%7C%20LESO-brightgreen.svg)](docs/paper/RESEARCH_PAPER.md)
+[![Paper](https://img.shields.io/badge/paper-IEEE%20TIE%20Draft-purple.svg)](docs/paper/RESEARCH_PAPER.md)
 [![Nonlinear](https://img.shields.io/badge/dynamics-Stribeck%20Friction%20%7C%20Lyapunov%20SMC-orange.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+> 📄 **Research Paper Available:** Read the full IEEE Transactions on Industrial Electronics manuscript: [**`docs/paper/RESEARCH_PAPER.md`**](docs/paper/RESEARCH_PAPER.md) | [LaTeX Source](docs/paper/Robust_DC_Motor_Control_TIE.tex) with Theorem 1 (*Finite-Time Convergence*) and Theorem 2 (*CBF Forward Invariance*).
 
 ---
 
