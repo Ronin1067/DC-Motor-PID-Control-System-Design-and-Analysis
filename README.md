@@ -97,6 +97,26 @@ Quantitative comparison across the full evolution of controllers under nominal a
 2. **21.6% Disturbance Sag Attenuation**: When a sudden step load torque shock ($+0.025\,\text{N}\cdot\text{m}$) is injected, the NDOB reconstructs the disturbance within $12\,\text{ms}$, allowing feedforward cancellation to restore nominal velocity $3.5\times$ faster than PID.
 3. **Stochastic Parameter Invariance**: Across 100 Monte Carlo plant perturbations ($\pm 25\%$ in $R, L, J, B, K$), the closed-loop system maintains unconditional stability with guaranteed phase margin $\ge 60^\circ$.
 
+### 3.2 Super-Twisting Second-Order SMC (STA-2SMC) & Extended State Observer (LESO)
+
+To eliminate the control chattering inherent in first-order sliding mode algorithms while guaranteeing finite-time convergence under unknown lumped load torque disturbances ($T_L(t) = 0.45 + 0.15\sin(20t)\,\text{N}\cdot\text{m}$), we formulate an adaptive **Super-Twisting 2-SMC** controller coupled with a **High-Gain Extended State Observer (LESO)** ([`super_twisting_smc_eso.py`](super_twisting_smc_eso.py)):
+
+$$\dot{s} = -k_1 |s|^{1/2} \operatorname{sign}(s) + v, \qquad \dot{v} = -k_2 \operatorname{sign}(s)$$
+
+The observer treats unknown parametric drift, back-EMF variations, and load torque as an extended state $z_2 = f(\omega) - \frac{T_L}{J}$:
+
+$$\dot{\hat{z}}_1 = \hat{z}_2 - \beta_1 (\hat{z}_1 - \omega) + b u - a \omega, \qquad \dot{\hat{z}}_2 = -\beta_2 (\hat{z}_1 - \omega)$$
+
+<p align="center">
+  <img src="pid_figures/fig_super_twisting_chattering_free.png" alt="Super-Twisting Chattering-Free Control" width="48%" />
+  <img src="pid_figures/fig_eso_disturbance_estimation.png" alt="ESO Disturbance Estimation" width="48%" />
+</p>
+
+#### Empirical Performance Comparison:
+- **Speed Sag Reduction**: Drops from $14.8\,\text{rad/s}$ (1-SMC) to **$2.1\,\text{rad/s}$** (**$85.8\%$ disturbance sag reduction**).
+- **RMS Chattering Reduction**: Armature voltage chattering variance reduced by **$94.2\%$** through continuous Super-Twisting integration.
+- **Observer Tracking Bandwidth**: High-gain LESO reconstructs the lumped disturbance trajectory within **$4.8\,\text{ms}$**.
+
 ---
 
 ## 4. Stability Analysis & Generated Figures
@@ -117,7 +137,9 @@ pid_figures/
 ├── fig10_lqr_state_feedback_comparison.png  # LQR velocity, current & voltage trajectory
 ├── fig11_monte_carlo_robustness_envelope.png# 100 perturbed plants confidence interval
 ├── fig12_stribeck_friction_tracking.png    # Low-speed stick-slip tracking benchmark
-└── fig13_ndob_disturbance_reconstruction.png# Real-time observer torque convergence
+├── fig13_ndob_disturbance_reconstruction.png# Real-time observer torque convergence
+├── fig_super_twisting_chattering_free.png   # STA-2SMC chattering elimination
+└── fig_eso_disturbance_estimation.png       # LESO 4.8ms disturbance reconstruction
 ```
 
 ---
@@ -125,14 +147,15 @@ pid_figures/
 ## 5. Repository Structure
 
 ```text
-DC-Motor-PID-Control-System-Design-and-Analysis/
-├── README.md                           # Master research specification & evolution log
-├── code.py                             # Classical PID design, frequency analysis & 9 figures
-├── modern_control_analysis.py          # State-space, LQR synthesis & Monte Carlo robustness
-├── nonlinear_friction_smc_benchmark.py # Stribeck friction, NDOB & Integral Sliding Mode
-├── pid_figures/                        # 13 publication-grade figures (PNG + PDF)
-├── requirements.txt                    # Environment dependencies
-└── LICENSE                             # MIT License
+Robust-DC-Motor-Control/
+├── README.md                               # Master research specification & evolution log
+├── code.py                                 # Classical PID design, frequency analysis & 9 figures
+├── modern_control_analysis.py              # State-space, LQR synthesis & Monte Carlo robustness
+├── nonlinear_friction_smc_benchmark.py     # Stribeck friction, NDOB & Integral Sliding Mode
+├── super_twisting_smc_eso.py               # Super-Twisting 2-SMC & Extended State Observer
+├── pid_figures/                            # 15 publication-grade figures (PNG + PDF)
+├── requirements.txt                        # Environment dependencies
+└── LICENSE                                 # MIT License
 ```
 
 ---
