@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software or research architecture in your work, please cite it as below."
+title: "Precision-Drive-Dynamics: Neural-Adaptive Super-Twisting 2-SMC with Control Barrier Functions and High-Gain LESO"
+authors:
+  - family-names: "Koduru"
+    given-names: "Yagnesh Kumar"
+    affiliation: "Esthien Labs"
+    orcid: "https://orcid.org/0009-0000-0000-0000"
+date-released: 2026-09-04
+repository-code: "https://github.com/yagneshkumarkoduru/Precision-Drive-Dynamics"
+license: "MIT"
+keywords:
+  - "sliding mode control"
+  - "super-twisting algorithm"
+  - "extended state observer"
+  - "control barrier functions"
+  - "precision drives"

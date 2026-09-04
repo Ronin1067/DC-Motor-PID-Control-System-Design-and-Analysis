@@ -2,12 +2,13 @@
 
 **Research Project | Advanced Nonlinear Control Systems, Non-Newtonian Friction & Physical Motion Intelligence**
 
+[![CI](https://github.com/yagneshkumarkoduru/Precision-Drive-Dynamics/actions/workflows/ci.yml/badge.svg)](https://github.com/yagneshkumarkoduru/Precision-Drive-Dynamics/actions)
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Control Theory](https://img.shields.io/badge/control-Neural--Adaptive%20STA%20%7C%20CBF%20%7C%20LESO-brightgreen.svg)](docs/paper/RESEARCH_PAPER.md)
 [![Paper](https://img.shields.io/badge/paper-IEEE%20TIE%20Draft-purple.svg)](docs/paper/RESEARCH_PAPER.md)
 [![Nonlinear](https://img.shields.io/badge/dynamics-Stribeck%20Friction%20%7C%20Lyapunov%20SMC-orange.svg)](docs/NONLINEAR_DYNAMICS_AND_SMC_PROOFS.md)
 [![Hardware](https://img.shields.io/badge/hardware-STM32%20%7C%20FreeRTOS%20%7C%20CAN%20Bus-red.svg)](docs/IMPLEMENTATION_VERSIONS.md)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > 📄 **Research Paper Manuscript:** Read the full IEEE Transactions on Industrial Electronics manuscript: [**`docs/paper/RESEARCH_PAPER.md`**](docs/paper/RESEARCH_PAPER.md) | [LaTeX Source](docs/paper/Precision_Drive_Dynamics_TIE.tex) with Theorem 1 (*Finite-Time Sliding Convergence*) and Theorem 2 (*CBF Safe Invariance*).  
 > 📐 **Mathematical Derivations & Lyapunov Proofs:** Complete Moreno-Osorio quadratic Lyapunov candidate proofs, LESO error boundedness lemmas, and Stribeck models: [**`docs/NONLINEAR_DYNAMICS_AND_SMC_PROOFS.md`**](docs/NONLINEAR_DYNAMICS_AND_SMC_PROOFS.md).  
