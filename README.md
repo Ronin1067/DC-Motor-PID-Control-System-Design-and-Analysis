@@ -1,4 +1,4 @@
-# High-Precision Electromechanical Regulation: Classical PID, Optimal LQR, Nonlinear Stribeck Friction & Disturbance-Observer Sliding Mode Control
+# Precision-Drive-Dynamics: Nonlinear Actuator Dynamics, State-Space LQR & Neural-Adaptive Sliding Mode Control
 
 **Independent Research Project | Advanced Nonlinear Control Systems, State Estimation & Robotics Actuation**
 
@@ -8,7 +8,7 @@
 [![Nonlinear](https://img.shields.io/badge/dynamics-Stribeck%20Friction%20%7C%20Lyapunov%20SMC-orange.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> 📄 **Research Paper Available:** Read the full IEEE Transactions on Industrial Electronics manuscript: [**`docs/paper/RESEARCH_PAPER.md`**](docs/paper/RESEARCH_PAPER.md) | [LaTeX Source](docs/paper/Robust_DC_Motor_Control_TIE.tex) with Theorem 1 (*Finite-Time Convergence*) and Theorem 2 (*CBF Forward Invariance*).
+> 📄 **Research Paper Available:** Read the full IEEE Transactions on Industrial Electronics manuscript: [**`docs/paper/RESEARCH_PAPER.md`**](docs/paper/RESEARCH_PAPER.md) | [LaTeX Source](docs/paper/Precision_Drive_Dynamics_TIE.tex) with Theorem 1 (*Finite-Time Convergence*) and Theorem 2 (*CBF Forward Invariance*).
 
 ---
 
@@ -177,12 +177,12 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### Run Classical Frequency Analysis
+### Run Classical Frequency-Domain Analysis
 ```bash
-python code.py
+python classical_frequency_response.py
 ```
 
-### Run Modern LQR & Monte Carlo Robustness
+### Run Modern State-Space & Monte Carlo Study
 ```bash
 python modern_control_analysis.py
 ```
@@ -194,19 +194,14 @@ python nonlinear_friction_smc_benchmark.py
 
 ---
 
-## 7. Author & Citation
-
-**Yagnesh Kumar Koduru**  
-*Independent Researcher | Physical Intelligence, Nonlinear Control & Actuator Dynamics*  
-GitHub: [@yagneshkumarkoduru](https://github.com/yagneshkumarkoduru)  
-Portfolio: [yagnesh-portfolio-eight.vercel.app](https://yagnesh-portfolio-eight.vercel.app)
+## 7. Citation
 
 ```bibtex
-@misc{koduru2026motioncontrol,
+@misc{koduru2026precisiondrive,
   author = {Koduru, Yagnesh Kumar},
-  title = {High-Precision Electromechanical Regulation: Classical PID, Optimal LQR, Nonlinear Stribeck Friction and Disturbance-Observer Sliding Mode Control},
+  title = {Precision-Drive-Dynamics: Nonlinear Actuator Dynamics, State-Space LQR and Neural-Adaptive Sliding Mode Control},
   year = {2026},
   publisher = {GitHub},
-  howpublished = {\url{https://github.com/yagneshkumarkoduru/DC-Motor-PID-Control-System-Design-and-Analysis}}
+  howpublished = {\url{https://github.com/yagneshkumarkoduru/Precision-Drive-Dynamics}}
 }
 ```

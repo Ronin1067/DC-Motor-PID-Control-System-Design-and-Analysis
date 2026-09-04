@@ -1,8 +1,6 @@
 """
-Super-Twisting Second-Order Sliding Mode Control (STA-2SMC) & Extended State Observer (ESO)
-Author: Yagnesh Kumar Koduru
-Repository: Robust-DC-Motor-Control
-Domain: Non-Linear Control Systems, Disturbance Observers, Robust Mechatronics
+Super-Twisting Second-Order Sliding Mode Control (STA-2SMC) & Extended State Observer (LESO).
+Chattering-free continuous robust regulation against external torque disturbances.
 """
 
 import os
@@ -157,7 +155,6 @@ class SuperTwistingSMC_ESO_Engine:
 def run_super_twisting_benchmark():
     print("=" * 80)
     print("SUPER-TWISTING 2-SMC & EXTENDED STATE OBSERVER BENCHMARK")
-    print("Author: Yagnesh Kumar Koduru")
     print("=" * 80)
 
     engine = SuperTwistingSMC_ESO_Engine()

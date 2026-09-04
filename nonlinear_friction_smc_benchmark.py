@@ -1,10 +1,6 @@
 """
-Nonlinear Friction Modeling, Disturbance Observer (NDOB) & Integral Sliding Mode Control (ISMC)
-Author: Yagnesh Kumar Koduru
-Repository: DC-Motor-PID-Control-System-Design-and-Analysis
-Domain: Precision Robotics, Nonlinear Control, Actuator Dynamics, Physical Intelligence
-
-This research module implements:
+Nonlinear Stribeck Friction Dynamics, Disturbance Observer (NDOB) & Integral Sliding Mode Control (ISMC).
+Implements:
 1. First-principles Stribeck friction dynamics (Coulomb, Stribeck, and viscous friction)
 2. Nonlinear Disturbance Observer (NDOB) for real-time load torque estimation
 3. Integral Sliding Mode Controller (ISMC) with smooth boundary-layer chattering suppression

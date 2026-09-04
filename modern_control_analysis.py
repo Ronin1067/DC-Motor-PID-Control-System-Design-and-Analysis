@@ -1,10 +1,6 @@
 """
-Modern State-Space Control, LQR Synthesis, Observer Design & Monte Carlo Robustness Analysis
-Author: Yagnesh Kumar Koduru
-Repository: DC-Motor-PID-Control-System-Design-and-Analysis
-Domain: Precision Motion Control, Robust Control Theory, Physical Intelligence
-
-This module implements:
+Modern State-Space Control, LQR Synthesis, Observer Design & Monte Carlo Robustness Analysis.
+Implements:
 1. 2-state electromechanical speed regulation state-space modeling [omega, i_a]^T
 2. Controllability and Observability proofs
 3. Linear Quadratic Regulator (LQR) state-feedback synthesis with feedforward precompensation

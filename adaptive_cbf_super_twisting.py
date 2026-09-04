@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 """
-adaptive_cbf_super_twisting.py
-==============================
 Neural-Adaptive Super-Twisting 2-SMC with Control Barrier Functions (CBF)
-and High-Gain Linear Extended State Observer (LESO) for Precision DC Drives.
-
-Author: Yagnesh Kumar Koduru
-Affiliation: Researcher | Esthien Labs
+and High-Gain Linear Extended State Observer (LESO) for Precision Electromechanical Drives.
 """
 
 import os
